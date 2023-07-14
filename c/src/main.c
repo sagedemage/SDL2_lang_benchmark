@@ -5,75 +5,94 @@
 #define LEVEL_HEIGHT 500
 
 struct Player {
-	SDL_Texture *PlayerTex; // player texture
-    SDL_Rect dstrect; // player destination
-    SDL_Rect srcrect;       // player source from the player spritesheet
-	int speed;        // horizontal and vertical velocity
+    SDL_Texture *texture; /* player texture */
+    SDL_Rect dstrect; /* player destination */
+    SDL_Rect srcrect;       /* player source from the player spritesheet */
+    int speed;        /* horizontal and vertical velocity */
 };
 
 int main() {
-	/* Frames per second */
-	const int miliseconds = 1000;   // 1000 ms equals 1s
-	const int gameplay_frames = 60; // amount of frames per second
+    /* Frames per second */
+    /* 1000 ms equals 1s */
+    const int miliseconds = 1000;
+    /* amount of frames per second */
+    const int gameplay_frames = 60;
 
     /* Player Attributes */
     const int player_width = 20;
     const int player_height = 20;
-    const int player_speed = 2;   // speed of player
-    const int player_offset = 50; // gap between left corner of the window
-
+    const int player_speed = 2;   /* speed of player */
+    const int player_offset = 50; /* gap between left corner of the window */
     /* Paths to the assets of the game */
-    const char *player_path = "player.bmp";
+    const char *player_path = "./player.bmp";
 
-    /* Initialize SDL, window, audio, and renderer */
-    int sdl_status = SDL_Init(SDL_INIT_VIDEO); // Initialize SDL library
+    int sdl_status;
+    SDL_Window *win;
+    SDL_Renderer *rend;
+    SDL_Surface *player_surface;
+    SDL_Texture *player_texture;
+    SDL_Rect player_dstrect;
+    SDL_Rect player_srcrect;
+    struct Player player;
+    bool quit = false; /* gameplay loop switch */
+    const Uint8 *state;
+
+    /* Initialize SDL Library */
+    sdl_status = SDL_Init(SDL_INIT_VIDEO);
 
     if (sdl_status == -1) {
         printf("SDL_Init: %s\n", SDL_GetError());
     }
 
-    // Create window
-    SDL_Window *win = SDL_CreateWindow("Myzdin", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, LEVEL_WIDTH, LEVEL_HEIGHT, 0);
+    /* Create window */
+    win = SDL_CreateWindow("Myzdin", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, LEVEL_WIDTH, LEVEL_HEIGHT, 0);
 
-    // Creates a renderer to render the images
-    // * SDL_RENDERER_SOFTWARE starts the program using the CPU hardware
-    // * SDL_RENDERER_ACCELERATED starts the program using the GPU hardware
-    SDL_Renderer *rend = SDL_CreateRenderer(win, -1, SDL_RENDERER_SOFTWARE);
+    /* Creates a renderer to render the images
+    * SDL_RENDERER_SOFTWARE starts the program using the CPU hardware
+    * SDL_RENDERER_ACCELERATED starts the program using the GPU hardware
+    */
+    rend = SDL_CreateRenderer(win, -1, SDL_RENDERER_SOFTWARE);
     SDL_SetRenderDrawColor(rend, 134, 191, 255, 255);
 
-    /* Loads images, music, and soundeffects */
-    // Creates the asset that loads the image into main memory
-    SDL_Surface *PlayerSurf = SDL_LoadBMP(player_path);
+    /* Creates the asset that loads the image into main memory */
+    player_surface = SDL_LoadBMP(player_path);
 
-    // Loads image to our graphics hardware memory
-    SDL_Texture *PlayerTex = SDL_CreateTextureFromSurface(rend, PlayerSurf);
+    /* Loads image to our graphics hardware memory */
+    player_texture = SDL_CreateTextureFromSurface(rend, player_surface);
 
-	SDL_Rect dstrect = {0 + player_offset, LEVEL_HEIGHT - player_height - player_offset, player_width, player_height};
-	SDL_Rect srcrect = {0, 0, player_width, player_height};
+    player_dstrect.x = 0 + player_offset;
+    player_dstrect.y = LEVEL_HEIGHT - player_height - player_offset;
+    player_dstrect.w = player_width;
+    player_dstrect.h = player_height;
 
-    struct Player player = {PlayerTex, dstrect, srcrect, player_speed};
+    player_srcrect.x = 0;
+    player_srcrect.y = 0;
+    player_srcrect.w = player_width;
+    player_srcrect.h = player_height;
 
-    /* Gameplay Loop */
-    // GamePlay(rend, player, gamecontroller); // Start movement and physics
-    bool quit = false; // gameplay loop switch
+    player.texture = player_texture;
+    player.dstrect = player_dstrect;
+    player.srcrect = player_srcrect;
+    player.speed = player_speed;
 
-    while (!quit) { // gameplay loop
+    while (!quit) { 
+        /* Gameplay Loop */
         /* Keybindings */
         /* Click Key Bindings */
-        SDL_Event event; // Event handling
+        SDL_Event event; /* Event handling */
 
-        while (SDL_PollEvent(&event) == 1) { // Events management
+        while (SDL_PollEvent(&event) == 1) { /* Events management */
             switch (event.type) {
-            case SDL_QUIT: // close button
+            case SDL_QUIT: /* close button */
                 quit = true;
                 break;
-            case SDL_KEYDOWN: // key press
+            case SDL_KEYDOWN: /* key press */
                 if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
                     quit = true;
                 }
                 break;
 
-            case SDL_CONTROLLERBUTTONDOWN: // controller button press
+            case SDL_CONTROLLERBUTTONDOWN: /* controller button press */
                 if (event.cbutton.button == SDL_CONTROLLER_BUTTON_START) {
                     quit = true;
                 }
@@ -83,65 +102,71 @@ int main() {
         }
 
         /* Hold Keybindings */
-        // Get the snapshot of the current state of the keyboard
-        const Uint8 *state = SDL_GetKeyboardState(NULL);
+        /* Get the snapshot of the current state of the keyboard */
+        state = SDL_GetKeyboardState(NULL);
 
-        if (state[SDL_SCANCODE_LEFT] == 1) { // move player left
+        if (state[SDL_SCANCODE_LEFT] == 1) { 
+            /* move player left */
             player.dstrect.x -= player.speed;
         }
 
-		else if (state[SDL_SCANCODE_RIGHT] == 1) { // move player right
+        else if (state[SDL_SCANCODE_RIGHT] == 1) { 
+            /* move player right */
             player.dstrect.x += player.speed;
         }
 
-        if (state[SDL_SCANCODE_UP] == 1) { // move player up
+        if (state[SDL_SCANCODE_UP] == 1) { 
+            /* move player up */
             player.dstrect.y -= player.speed;
         } 
 
-		else if (state[SDL_SCANCODE_DOWN] == 1) { // move player down
+        else if (state[SDL_SCANCODE_DOWN] == 1) { 
+            /* move player down */
             player.dstrect.y += player.speed;
         }
 
         /* Player boundaries */
         if (player.dstrect.x < 0) {
-        	// left boundary
+            /* left boundary */
             player.dstrect.x = 0;
         }
         if (player.dstrect.x + player.dstrect.w > LEVEL_WIDTH) {
-        	// right boundary
+            /* right boundary */
             player.dstrect.x = LEVEL_WIDTH - player.dstrect.w;
         }
         if (player.dstrect.y + player.dstrect.h > LEVEL_HEIGHT) {
-        	// bottom boundary
+            /* bottom boundary */
             player.dstrect.y = LEVEL_HEIGHT - player.dstrect.h;
         }
         if (player.dstrect.y < 0) {
-        	// top boundary
+            /* top boundary */
             player.dstrect.y = 0;
         }
 
         SDL_RenderClear(rend);
 
-        SDL_RenderCopy(rend, player.PlayerTex, &player.srcrect, &player.dstrect);
+        SDL_RenderCopy(rend, player.texture, &player.srcrect, &player.dstrect);
 
-        SDL_RenderPresent(rend); // Triggers double buffers for multiple rendering
-        SDL_Delay(miliseconds / gameplay_frames); // Calculates to 60 fps
+		/* Triggers double buffers for multiple rendering */
+        SDL_RenderPresent(rend);
+
+		/* Calculates to 60 fps */
+        SDL_Delay(miliseconds / gameplay_frames);
     }
 
-    /* Free resources and close SDL and SDL mixer */
-    // Deallocate player and scene surfaces
-    SDL_FreeSurface(PlayerSurf);
+    /* Deallocate player and scene surfaces */
+    SDL_FreeSurface(player_surface);
 
-    // Destroy scene and player textures
-    SDL_DestroyTexture(PlayerTex);
+    /* Destroy scene and player textures */
+    SDL_DestroyTexture(player_texture);
 
-    // Destroy renderer
+    /* Destroy renderer */
     SDL_DestroyRenderer(rend);
 
-    // Destroy window
+    /* Destroy window */
     SDL_DestroyWindow(win);
-	
-	// Quit SDL subsystems
+
+    /* Quit SDL subsystems */
     SDL_Quit();
 
     return 0;
