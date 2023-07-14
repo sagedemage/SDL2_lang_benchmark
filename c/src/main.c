@@ -1,5 +1,5 @@
 #include <SDL2/SDL.h>
-#include <stdbool.h>
+/*#include <stdbool.h>*/
 
 #define LEVEL_WIDTH 750
 #define LEVEL_HEIGHT 500
@@ -34,7 +34,7 @@ int main() {
     SDL_Rect player_dstrect;
     SDL_Rect player_srcrect;
     struct Player player;
-    bool quit = false; /* gameplay loop switch */
+    int quit = 0; /* gameplay loop switch */
     const Uint8 *state;
 
     /* Initialize SDL Library */
@@ -84,17 +84,17 @@ int main() {
         while (SDL_PollEvent(&event) == 1) { /* Events management */
             switch (event.type) {
             case SDL_QUIT: /* close button */
-                quit = true;
+                quit = 1;
                 break;
             case SDL_KEYDOWN: /* key press */
                 if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
-                    quit = true;
+                    quit = 1;
                 }
                 break;
 
             case SDL_CONTROLLERBUTTONDOWN: /* controller button press */
                 if (event.cbutton.button == SDL_CONTROLLER_BUTTON_START) {
-                    quit = true;
+                    quit = 1;
                 }
             default:
                 break;
