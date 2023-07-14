@@ -1,0 +1,20 @@
+# Binary directories
+target
+bin
+zig-cache 
+zig-out
+
+# Production directory
+zig/prod/*
+!zig/prod/build.sh
+!zig/prod/player.bmp
+
+# Media files
+*.kra
+*.mscz
+*.aup3
+
+# Cache files
+*.*~
+
+
